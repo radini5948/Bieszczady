@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: flood_monitoring
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 8mygo=vef
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
