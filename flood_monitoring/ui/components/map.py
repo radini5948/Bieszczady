@@ -17,12 +17,12 @@ def create_stations_map(geojson_data: Dict[str, Any]) -> folium.Map:
             geojson_data,
             name="stations",
             popup=folium.GeoJsonPopup(
-                fields=["nazwa_stacji", "rzeka"],
+                fields=["stacja", "rzeka"],
                 aliases=["Nazwa stacji", "Rzeka"],
                 localize=True,
             ),
             tooltip=folium.GeoJsonTooltip(
-                fields=["nazwa_stacji"],
+                fields=["stacja"],
                 aliases=[""],
                 style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
             ),

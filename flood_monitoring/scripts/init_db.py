@@ -9,7 +9,7 @@ from sqlalchemy.exc import OperationalError
 from flood_monitoring.core.database import Base, engine
 from flood_monitoring.models.measurements import PrzeplywMeasurement, StanMeasurement
 from flood_monitoring.models.station import Station
-
+from flood_monitoring.models.warnings import HydroWarning, WarningArea
 
 def wait_for_db(max_retries=5, retry_interval=5):
     """Czeka na gotowość bazy danych"""

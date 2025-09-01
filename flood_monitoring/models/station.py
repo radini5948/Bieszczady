@@ -13,12 +13,13 @@ class Station(Base):
 
     __tablename__ = "stations"
 
-    kod_stacji = Column(String, primary_key=True)
-    nazwa_stacji = Column(String, nullable=False)
+    id_stacji = Column(String, primary_key=True)
+    stacja = Column(String, nullable=False)
     rzeka = Column(String)
     lat = Column(Float, nullable=False)
     lon = Column(Float, nullable=False)
     geom = Column(Geometry("POINT", srid=4326), nullable=False)
+    wojewodztwo = Column(String, nullable=False)
 
     # Relacje do pomiarów
     stan_measurements = relationship("StanMeasurement", back_populates="station")
@@ -27,4 +28,4 @@ class Station(Base):
     )
 
     def __repr__(self):
-        return f"<Station(kod_stacji='{self.kod_stacji}', nazwa_stacji='{self.nazwa_stacji}')>"
+        return f"<Station(id_stacji='{self.id_stacji}', stacja='{self.stacja}')>"

@@ -17,7 +17,8 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/flood_monitoring"
 
     # IMGW API settings
-    IMGW_API_URL: str = "https://danepubliczne.imgw.pl/api/data/hydro2"
+    IMGW_API_URL: str = "https://danepubliczne.imgw.pl/api/data/hydro/"
+    IMGW_WARNINGS_URL:str = "https://danepubliczne.imgw.pl/api/data/warningshydro"
 
     class Config:
         case_sensitive = True

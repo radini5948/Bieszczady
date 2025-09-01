@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from flood_monitoring.models.measurements import PrzeplywMeasurement, StanMeasurement
 from flood_monitoring.models.station import Station
-
+from flood_monitoring.models.warnings import HydroWarning, WarningArea
 logger = logging.getLogger(__name__)
 
 
@@ -23,28 +23,38 @@ class DatabaseService:
         """Pobierz wszystkie stacje z bazy danych"""
         return self.db.query(Station).all()
 
+    def get_all_warnings(self):
+        """Pobierz wszystkie ostrzeżenia"""
+        return self.db.query(HydroWarning).all()
+
+    def get_warning_by_id(self, warning_id: int):
+        """Pobierz ostrzeżenie po ID"""
+        return self.db.query(HydroWarning).filter(HydroWarning.id == warning_id).first()
     def get_or_create_station(
         self,
-        kod_stacji: str,
-        nazwa_stacji: str,
+        id_stacji: str,
+        stacja: str,
         lat: float,
         lon: float,
-        rzeka: str = None,
+        rzeka: str,
+        wojewodztwo: str
+
     ) -> Station:
         """Pobierz lub utwórz stację"""
-        station = self.db.query(Station).filter_by(kod_stacji=kod_stacji).first()
+        station = self.db.query(Station).filter_by(id_stacji=id_stacji).first()
         if not station:
             # Tworzymy punkt geometryczny
             point = Point(lon, lat)
             geom = from_shape(point, srid=4326)
 
             station = Station(
-                kod_stacji=kod_stacji,
-                nazwa_stacji=nazwa_stacji,
+                id_stacji=id_stacji,
+                stacja=stacja,
                 lat=lat,
                 lon=lon,
                 rzeka=rzeka,
                 geom=geom,
+                wojewodztwo=wojewodztwo
             )
             self.db.add(station)
             try:
@@ -55,22 +65,22 @@ class DatabaseService:
         return station
 
     def add_stan_measurement(
-        self, station_id: str, stan_data: datetime, stan: float
+        self, station_id: str, stan_wody_data_pomiaru: datetime, stan_wody: float
     ) -> bool:
         """Dodaj pomiar stanu wody. Zwraca True jeśli dodano nowy pomiar, False jeśli już istniał."""
         # Sprawdź czy pomiar już istnieje
         existing = (
             self.db.query(StanMeasurement)
-            .filter_by(station_id=station_id, stan_data=stan_data)
+            .filter_by(station_id=station_id, stan_wody_data_pomiaru=stan_wody_data_pomiaru)
             .first()
         )
 
         if existing:
             return False
 
-        measurement_id = f"{station_id}_{stan_data.isoformat()}"
+        measurement_id = f"{station_id}_{stan_wody_data_pomiaru.isoformat()}"
         measurement = StanMeasurement(
-            id=measurement_id, station_id=station_id, stan_data=stan_data, stan=stan
+            id=measurement_id, station_id=station_id, stan_wody_data_pomiaru=stan_wody_data_pomiaru, stan_wody=stan_wody
         )
         self.db.add(measurement)
         try:
@@ -81,7 +91,7 @@ class DatabaseService:
             return False
 
     def add_przeplyw_measurement(
-        self, station_id: str, przeplyw_data: datetime, przeplyw: float
+        self, station_id: str, przeplyw_data: datetime, przelyw: float
     ) -> bool:
         """Dodaj pomiar przepływu. Zwraca True jeśli dodano nowy pomiar, False jeśli już istniał."""
         # Sprawdź czy pomiar już istnieje
@@ -99,7 +109,7 @@ class DatabaseService:
             id=measurement_id,
             station_id=station_id,
             przeplyw_data=przeplyw_data,
-            przeplyw=przeplyw,
+            przelyw=przelyw
         )
         self.db.add(measurement)
         try:
@@ -121,7 +131,7 @@ class DatabaseService:
             self.db.query(StanMeasurement)
             .filter(
                 StanMeasurement.station_id == station_id,
-                StanMeasurement.stan_data >= start_date,
+                StanMeasurement.stan_wody_data_pomiaru >= start_date,
             )
             .all()
         )
@@ -137,10 +147,10 @@ class DatabaseService:
 
         result = {
             "stan": [
-                {"stan_data": m.stan_data, "stan": m.stan} for m in stan_measurements
+                {"stan_wody_data_pomiaru": m.stan_wody_data_pomiaru, "stan_wody": m.stan_wody} for m in stan_measurements
             ],
-            "przeplyw": [
-                {"przeplyw_data": m.przeplyw_data, "przeplyw": m.przeplyw}
+            "przelyw": [
+                {"przeplyw_data": m.przeplyw_data, "przelyw": m.przelyw}
                 for m in przeplyw_measurements
             ],
         }

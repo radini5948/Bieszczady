@@ -29,3 +29,14 @@ def get_station_data(station_id: str, days: int = 7) -> List[Dict[str, Any]]:
         return response.json()
     except Exception as e:
         raise Exception(f"Error fetching station data: {str(e)}")
+
+def get_warnings() -> List[Dict]:
+    """Pobierz ostrzeżenia z backendu"""
+    try:
+        #backend_url = "http://localhost:8000"  # Align with api_service.py
+        response = requests.get(f"{BACKEND_URL}/warnings")
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        raise Exception(f"Error fetching stations: {str(e)}")
+        # return []

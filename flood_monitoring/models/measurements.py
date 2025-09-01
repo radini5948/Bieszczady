@@ -15,20 +15,20 @@ class StanMeasurement(Base):
     id = Column(
         String, primary_key=True
     )  # Możemy użyć kombinacji kod_stacji + timestamp jako id
-    station_id = Column(String, ForeignKey("stations.kod_stacji"), nullable=False)
-    stan_data = Column(DateTime, nullable=False)
-    stan = Column(Float, nullable=False)
+    station_id = Column(String, ForeignKey("stations.id_stacji"), nullable=False)
+    stan_wody_data_pomiaru = Column(DateTime, nullable=False)
+    stan_wody = Column(Float, nullable=False)
 
     # Relacja do stacji
     station = relationship("Station", back_populates="stan_measurements")
 
     # Unikalny constraint na kombinację stacji i czasu
     __table_args__ = (
-        UniqueConstraint("station_id", "stan_data", name="uix_station_stan_time"),
+        UniqueConstraint("station_id", "stan_wody_data_pomiaru", name="uix_station_stan_time"),
     )
 
     def __repr__(self):
-        return f"<StanMeasurement(station_id='{self.station_id}', stan_data='{self.stan_data}')>"
+        return f"<StanMeasurement(station_id='{self.station_id}', stan_wody_data_pomiaru='{self.stan_wody_data_pomiaru}')>"
 
 
 class PrzeplywMeasurement(Base):
@@ -39,9 +39,9 @@ class PrzeplywMeasurement(Base):
     id = Column(
         String, primary_key=True
     )  # Możemy użyć kombinacji kod_stacji + timestamp jako id
-    station_id = Column(String, ForeignKey("stations.kod_stacji"), nullable=False)
+    station_id = Column(String, ForeignKey("stations.id_stacji"), nullable=False)
     przeplyw_data = Column(DateTime, nullable=False)
-    przeplyw = Column(Float, nullable=False)
+    przelyw = Column(Float, nullable=False)
 
     # Relacja do stacji
     station = relationship("Station", back_populates="przeplyw_measurements")

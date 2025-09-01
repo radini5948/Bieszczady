@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: flood_monitoring
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: 8mygo=vef
     ports:
       - "5432:5432"
     volumes:
@@ -24,10 +24,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/flood_monitoring
-      - POSTGRES_HOST=db
+      - DATABASE_URL=postgresql://postgres:8mygo=vef@host.docker.internal:5432/flood_monitoring
+      - POSTGRES_HOST=host.docker.internal
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=8mygo=vef
       - POSTGRES_DB=flood_monitoring
       - LOG_LEVEL=DEBUG
       - PYTHONUNBUFFERED=1
@@ -44,7 +44,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 90s
     volumes:
       - ./flood_monitoring:/app/flood_monitoring
       - ./pyproject.toml:/app/pyproject.toml
@@ -74,8 +74,11 @@ services:
       backend:
         condition: service_healthy
     volumes:
-      - ./flood_monitoring:/app/flood_monitoring:delegated
-      - ./pyproject.toml:/app/pyproject.toml:delegated
+      #- ./flood_monitoring:/app/flood_monitoring:delegated
+      #- ./pyproject.toml:/app/pyproject.toml:delegated
+      - /mnt/c/Users/Radek/OneDrive/Desktop/Python_Final/geoapps-project-2425-everlastingflames/flood_monitoring:/app/flood_monitoring
+      - /mnt/c/Users/Radek/OneDrive/Desktop/Python_Final/geoapps-project-2425-everlastingflames/pyproject.toml:/app/pyproject.toml
+
 
 volumes:
   postgres_data: 

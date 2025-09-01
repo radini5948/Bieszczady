@@ -19,25 +19,26 @@ router = APIRouter(prefix="/stations", tags=["stations"])
 
 class Station(BaseModel):
     id_stacji: str
-    nazwa_stacji: str
+    stacja: str
     lat: float
     lon: float
     rzeka: Optional[str] = None
+    wojewodztwo: str
 
 
 class StanMeasurement(BaseModel):
-    stan_data: datetime
-    stan: float
+    stan_wody_data_pomiaru: datetime
+    stan_wody: float
 
 
 class PrzeplywMeasurement(BaseModel):
     przeplyw_data: datetime
-    przeplyw: float
+    przelyw: float
 
 
 class StationMeasurements(BaseModel):
     stan: List[StanMeasurement]
-    przeplyw: List[PrzeplywMeasurement]
+    przelyw: List[PrzeplywMeasurement]
 
 
 @router.get("/", response_model=Dict[str, Any])
@@ -46,18 +47,19 @@ async def get_stations(db_service: DatabaseService = Depends(get_database_servic
     try:
         stations = db_service.get_all_stations()
         features = []
-        
+
         for station in stations:
             feature = Feature(
                 geometry=Point((float(station.lon), float(station.lat))),
                 properties={
-                    "id_stacji": station.kod_stacji,
-                    "nazwa_stacji": station.nazwa_stacji,
-                    "rzeka": station.rzeka
+                    "id_stacji": station.id_stacji,
+                    "stacja": station.stacja,
+                    "rzeka": station.rzeka,
+                    "wojewodztwo:": station.wojewodztwo
                 }
             )
             features.append(feature)
-        
+
         geojson = FeatureCollection(features)
         return geojson
 

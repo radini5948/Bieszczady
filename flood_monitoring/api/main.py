@@ -13,7 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from flood_monitoring.api.dependencies import get_database_service, get_imgw_service
-from flood_monitoring.api.routers import stations, sync
+from flood_monitoring.api.routers import stations, sync, warnings
 from flood_monitoring.core.config import get_settings
 from flood_monitoring.core.database import get_db
 from flood_monitoring.services.database import DatabaseService
@@ -49,6 +49,7 @@ app.add_middleware(
 # Include routers
 app.include_router(stations.router)
 app.include_router(sync.router)
+app.include_router(warnings.router)
 
 
 @app.get("/")
@@ -62,7 +63,7 @@ async def root():
 async def health_check(
     db: Session = Depends(get_db), imgw_service: IMGWService = Depends(get_imgw_service)
 ):
-    """Sprawdź stan aplikacji i połączenia z bazą danych"""
+    """Sprawdź stan_wody aplikacji i połączenia z bazą danych"""
     logger.info("Performing health check")
     status = {
         "status": "healthy",
