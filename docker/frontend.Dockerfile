@@ -1,6 +1,18 @@
-FROM python:3.11-slim
+FROM --platform=linux/amd64 python:3.11-slim
 
 WORKDIR /app
+
+# Install system dependencies including build tools
+RUN apt-get update && apt-get install -y \
+    gdal-bin \
+    libgdal-dev \
+    curl \
+    build-essential \
+    g++ \
+    gcc \
+    pkg-config \
+    cmake \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install UV
 RUN pip install uv

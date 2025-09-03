@@ -1,7 +1,7 @@
 """
 Modele dla pomiarów stanu wody i przepływu
 """
-from sqlalchemy import Column, DateTime, Float, ForeignKey, String, UniqueConstraint
+from sqlalchemy import Column, DateTime, Float, ForeignKey, String, UniqueConstraint, Index
 from sqlalchemy.orm import relationship
 
 from flood_monitoring.core.database import Base
@@ -22,9 +22,12 @@ class StanMeasurement(Base):
     # Relacja do stacji
     station = relationship("Station", back_populates="stan_measurements")
 
-    # Unikalny constraint na kombinację stacji i czasu
+    # Unikalny constraint na kombinację stacji i czasu oraz indeksy dla wydajności
     __table_args__ = (
         UniqueConstraint("station_id", "stan_wody_data_pomiaru", name="uix_station_stan_time"),
+        Index("ix_stan_station_id", "station_id"),
+        Index("ix_stan_data_pomiaru", "stan_wody_data_pomiaru"),
+        Index("ix_stan_station_date", "station_id", "stan_wody_data_pomiaru"),
     )
 
     def __repr__(self):
@@ -46,11 +49,14 @@ class PrzeplywMeasurement(Base):
     # Relacja do stacji
     station = relationship("Station", back_populates="przeplyw_measurements")
 
-    # Unikalny constraint na kombinację stacji i czasu
+    # Unikalny constraint na kombinację stacji i czasu oraz indeksy dla wydajności
     __table_args__ = (
         UniqueConstraint(
             "station_id", "przeplyw_data", name="uix_station_przeplyw_time"
         ),
+        Index("ix_przeplyw_station_id", "station_id"),
+        Index("ix_przeplyw_data", "przeplyw_data"),
+        Index("ix_przeplyw_station_date", "station_id", "przeplyw_data"),
     )
 
     def __repr__(self):

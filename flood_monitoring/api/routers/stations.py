@@ -43,20 +43,35 @@ class StationMeasurements(BaseModel):
 
 @router.get("/", response_model=Dict[str, Any])
 async def get_stations(db_service: DatabaseService = Depends(get_database_service)):
-    """Pobierz listę stacji pomiarowych z bazy danych w formacie GeoJSON"""
+    """Pobierz listę stacji pomiarowych z bazy danych w formacie GeoJSON z najnowszymi pomiarami"""
     try:
         stations = db_service.get_all_stations()
+        latest_measurements = db_service.get_latest_measurements_for_all_stations()
         features = []
 
         for station in stations:
+            # Pobierz najnowsze pomiary dla tej stacji
+            station_measurements = latest_measurements.get(station.id_stacji, {})
+            
+            properties = {
+                "id_stacji": station.id_stacji,
+                "stacja": station.stacja,
+                "rzeka": station.rzeka,
+                "wojewodztwo": station.wojewodztwo
+            }
+            
+            # Dodaj najnowsze pomiary jeśli są dostępne
+            if 'stan_wody' in station_measurements:
+                properties['stan_wody'] = station_measurements['stan_wody']
+                properties['stan_wody_data_pomiaru'] = station_measurements['stan_wody_data_pomiaru'].isoformat() if station_measurements['stan_wody_data_pomiaru'] else None
+            
+            if 'przeplyw' in station_measurements:
+                properties['przeplyw'] = station_measurements['przeplyw']
+                properties['przeplyw_data'] = station_measurements['przeplyw_data'].isoformat() if station_measurements['przeplyw_data'] else None
+            
             feature = Feature(
                 geometry=Point((float(station.lon), float(station.lat))),
-                properties={
-                    "id_stacji": station.id_stacji,
-                    "stacja": station.stacja,
-                    "rzeka": station.rzeka,
-                    "wojewodztwo:": station.wojewodztwo
-                }
+                properties=properties
             )
             features.append(feature)
 
@@ -71,13 +86,20 @@ async def get_stations(db_service: DatabaseService = Depends(get_database_servic
 async def get_station_data(
     station_id: str,
     days: int = 7,
+    extended: bool = False,
+    limit: int = 100,
     db_service: DatabaseService = Depends(get_database_service),
 ):
     """Pobierz dane z konkretnej stacji z bazy danych"""
     try:
-        logger.info(f"Received request for station {station_id} data")
-        measurements = db_service.get_station_measurements(station_id, days)
-        logger.info(f"Sending response for station {station_id}: {measurements}")
+        logger.info(f"Received request for station {station_id} data (extended={extended}, days={days}, limit={limit})")
+        
+        if extended:
+            measurements = db_service.get_station_measurements_extended(station_id, days, limit)
+        else:
+            measurements = db_service.get_station_measurements(station_id, days)
+            
+        logger.info(f"Sending response for station {station_id}: {len(measurements.get('stan', []))} stan measurements, {len(measurements.get('przelyw', []))} flow measurements")
         return measurements
     except Exception as e:
         logger.error(f"Error getting data for station {station_id}: {str(e)}")

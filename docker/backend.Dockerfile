@@ -1,12 +1,17 @@
-FROM python:3.11-slim
+FROM --platform=linux/amd64 python:3.11
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including build tools
 RUN apt-get update && apt-get install -y \
     gdal-bin \
     libgdal-dev \
     curl \
+    build-essential \
+    g++ \
+    gcc \
+    pkg-config \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
 
 # Install UV
@@ -29,4 +34,4 @@ COPY flood_monitoring ./flood_monitoring
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
-CMD ["/start.sh"] 
+CMD ["/start.sh"]
