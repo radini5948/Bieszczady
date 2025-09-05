@@ -4,9 +4,9 @@ services:
   db:
     image: postgis/postgis:17-3.4
     environment:
-      POSTGRES_DB: flood_monitoring
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: {POSTGRES_DB}
+      POSTGRES_USER: {POSTGRES_USER}
+      POSTGRES_PASSWORD: {POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -24,10 +24,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:8mygo=vef@host.docker.internal:5432/flood_monitoring
+      - DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/flood_monitoring
       - POSTGRES_HOST=host.docker.internal
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=8mygo=vef
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=flood_monitoring
       - LOG_LEVEL=DEBUG
       - PYTHONUNBUFFERED=1
@@ -74,10 +74,8 @@ services:
       backend:
         condition: service_healthy
     volumes:
-      #- ./flood_monitoring:/app/flood_monitoring:delegated
-      #- ./pyproject.toml:/app/pyproject.toml:delegated
-      - /mnt/c/Users/Radek/OneDrive/Desktop/Python_Final/geoapps-project-2425-everlastingflames/flood_monitoring:/app/flood_monitoring
-      - /mnt/c/Users/Radek/OneDrive/Desktop/Python_Final/geoapps-project-2425-everlastingflames/pyproject.toml:/app/pyproject.toml
+      - ./flood_monitoring:/app/flood_monitoring:delegated
+      - ./pyproject.toml:/app/pyproject.toml:delegated
 
 
 volumes:

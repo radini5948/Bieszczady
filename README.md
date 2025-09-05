@@ -1,4 +1,42 @@
-# System Monitorowania Zagrożeń Powodziowych
+# 🌊 System Monitorowania Powodzi
+
+System monitorowania powodzi w Polsce oparty na danych IMGW-PIB.
+
+## 🚀 Szybki start
+
+### Uruchomienie aplikacji
+
+```bash
+# Uruchom całą aplikację (backend + frontend)
+make start
+
+# Sprawdź status aplikacji
+make status
+
+# Zatrzymaj aplikację
+make stop
+```
+
+### Dostępne komendy Makefile
+
+| Komenda | Opis |
+|---------|------|
+| `make start` | Uruchom całą aplikację (backend + frontend) |
+| `make stop` | Zatrzymaj całą aplikację |
+| `make status` | Sprawdź status aplikacji |
+| `make dev` | Uruchom w trybie deweloperskim z hot-reload |
+| `make install` | Zainstaluj zależności |
+| `make clean` | Wyczyść cache i pliki tymczasowe |
+| `make restart` | Zrestartuj aplikację |
+| `make logs` | Pokaż logi backendu |
+| `make test` | Przetestuj działanie aplikacji |
+| `make help` | Pokaż pomoc |
+
+### Adresy aplikacji
+
+- **Frontend (Streamlit)**: http://localhost:8501
+- **Backend API**: http://localhost:8000
+- **Dokumentacja API**: http://localhost:8000/docs
 
 System do monitorowania i wizualizacji zagrożeń powodziowych w Polsce, wykorzystujący dane z IMGW. Aplikacja umożliwia śledzenie stanu wód w stacjach pomiarowych, wizualizację danych na interaktywnej mapie oraz analizę historycznych pomiarów.
 

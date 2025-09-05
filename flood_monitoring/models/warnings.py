@@ -1,7 +1,3 @@
-# Nowy plik: flood_monitoring/models/warnings.py
-"""
-Modele dla ostrzeżeń hydrologicznych
-"""
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -10,7 +6,6 @@ from flood_monitoring.core.database import Base
 
 
 class HydroWarning(Base):
-    """Model ostrzeżenia hydrologicznego"""
 
     __tablename__ = "hydro_warnings"
 
@@ -26,7 +21,6 @@ class HydroWarning(Base):
     przebieg = Column(Text, nullable=False)
     komentarz = Column(Text, nullable=False)
 
-    # Relacja do obszarów
     areas = relationship("WarningArea", back_populates="warning")
 
     def __repr__(self):
@@ -34,7 +28,6 @@ class HydroWarning(Base):
 
 
 class WarningArea(Base):
-    """Model obszaru ostrzeżenia"""
 
     __tablename__ = "warning_areas"
 
@@ -44,7 +37,6 @@ class WarningArea(Base):
     opis = Column(String, nullable=False)
     kod_zlewni = Column(ARRAY(String), nullable=False)
 
-    # Relacja do ostrzeżenia
     warning = relationship("HydroWarning", back_populates="areas")
 
     def __repr__(self):

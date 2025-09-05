@@ -1,6 +1,3 @@
-"""
-Główny plik aplikacji FastAPI
-"""
 import logging
 import os
 import sys
@@ -19,7 +16,6 @@ from flood_monitoring.core.database import get_db
 from flood_monitoring.services.database import DatabaseService
 from flood_monitoring.services.imgw import IMGWService
 
-# Konfiguracja loggingu
 log_level = os.getenv("LOG_LEVEL", "INFO")
 logging.basicConfig(
     level=getattr(logging, log_level),
@@ -28,7 +24,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 
-# Ustawienie poziomu logowania dla wszystkich loggerów
 logging.getLogger("flood_monitoring").setLevel(logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -37,7 +32,6 @@ app = FastAPI(
     title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -46,15 +40,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(stations.router)
 app.include_router(sync.router)
 app.include_router(warnings.router)
 
-
+"""Glowny endpoint"""
 @app.get("/")
 async def root():
-    """Endpoint główny"""
     logger.info("Received request to root endpoint")
     return {"message": "Flood Monitoring System API"}
 
@@ -63,7 +55,6 @@ async def root():
 async def health_check(
     db: Session = Depends(get_db), imgw_service: IMGWService = Depends(get_imgw_service)
 ):
-    """Sprawdź stan_wody aplikacji i połączenia z bazą danych"""
     logger.info("Performing health check")
     status = {
         "status": "healthy",
@@ -73,7 +64,6 @@ async def health_check(
     }
 
     try:
-        # Sprawdź połączenie z bazą danych
         db.execute(text("SELECT 1"))
         logger.debug("Database connection test successful")
     except Exception as e:
@@ -83,7 +73,6 @@ async def health_check(
         raise HTTPException(status_code=503, detail=status)
 
     try:
-        # Sprawdź połączenie z IMGW
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{imgw_service.base_url}/station") as response:
                 if response.status != 200:

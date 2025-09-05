@@ -1,6 +1,3 @@
-"""
-Router dla endpointów związanych z ostrzeżeniami hydrologicznymi
-"""
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Dict, Any
 from pydantic import BaseModel  # Add this import
@@ -33,10 +30,10 @@ class WarningResponse(BaseModel):
     komentarz: str
     obszary: List[WarningAreaResponse]
 
-
+"""Pobieranie listy ostrzezen"""
 @router.get("/", response_model=List[WarningResponse])
 async def get_warnings(db_service: DatabaseService = Depends(get_database_service)):
-    """Pobierz listę ostrzeżeń hydrologicznych"""
+
     try:
         warnings = db_service.get_all_warnings()
         response = []
@@ -68,17 +65,17 @@ async def get_warnings(db_service: DatabaseService = Depends(get_database_servic
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+"""Pobieranie konkretnych ostrzezen"""
 @router.get("/{warning_id}", response_model=WarningResponse)
 async def get_warning(
     warning_id: int,
     db_service: DatabaseService = Depends(get_database_service),
 ):
-    """Pobierz konkretne ostrzeżenie"""
+
     try:
         warning = db_service.get_warning_by_id(warning_id)
         if not warning:
-            raise HTTPException(status_code=404, detail="Warning not found")
+            raise HTTPException(status_code=404, detail="Nie znaleziono ostrzezenia")
         areas = [
             WarningAreaResponse(
                 wojewodztwo=area.wojewodztwo,
