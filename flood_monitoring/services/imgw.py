@@ -30,7 +30,6 @@ class IMGWService:
                 async with session.get(f"{self.base_url}") as response:
                     if response.status == 200:
                         stations = await response.json()
-                        # Zapisz stacje w bazie danych
                         for station in stations:
                             try:
                                 self.db_service.get_or_create_station(
@@ -59,11 +58,9 @@ class IMGWService:
             return None
 
         try:
-            # Najpierw próbujemy sparsować datę w formacie IMGW (bez strefy czasowej)
             try:
                 parsed_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
             except ValueError:
-                # Jeśli nie pasuje, próbujemy inne formaty
                 formats = [
                     "%Y-%m-%dT%H:%M:%S",
                     "%Y-%m-%dT%H:%M:%S.%f",
@@ -80,10 +77,8 @@ class IMGWService:
                     except ValueError:
                         continue
                 else:
-                    # Jeśli żaden format nie pasuje
                     return None
 
-            # Porównujemy daty bez stref czasowych
             now = datetime.now()
             if parsed_date.date() > now.date():
                 logger.warning(f"Found future date: {date_str}, skipping")
@@ -115,7 +110,6 @@ class IMGWService:
                             logger.warning(f"No data received for station {station_id}")
                             return {"stan_wody": []}
 
-                        # API zwraca listę z jednym elementem
                         measurement = data[0]
 
                         if (
@@ -125,7 +119,6 @@ class IMGWService:
                         ):
                             przeplyw_data = self._parse_datetime(measurement["przeplyw_data"])
                             if przeplyw_data:
-                                # Zapisujemy pomiar w bazie
                                 if self.db_service.add_przeplyw_measurement(
                                     station_id=station_id,
                                     przeplyw_data=przeplyw_data,
@@ -138,8 +131,6 @@ class IMGWService:
                                     logger.info(
                                         f"Pomiar dla stacji {station_id} już istnieje w bazie"
                                     )
-
-                                # Zwracamy pomiar
                                 return {
                                     "przelyw": [
                                         {
@@ -179,7 +170,6 @@ class IMGWService:
                             logger.warning(f"No data received for station {station_id}")
                             return {"stan_wody": []}
 
-                        # API zwraca listę z jednym elementem
                         measurement = data[0]
 
                         if (
@@ -189,7 +179,6 @@ class IMGWService:
                         ):
                             stan_wody_data_pomiaru = self._parse_datetime(measurement["stan_wody_data_pomiaru"])
                             if stan_wody_data_pomiaru:
-                                # Zapisujemy pomiar w bazie
                                 if self.db_service.add_stan_measurement(
                                     station_id=station_id,
                                     stan_wody_data_pomiaru=stan_wody_data_pomiaru,
@@ -203,7 +192,6 @@ class IMGWService:
                                         f"Pomiar dla stacji {station_id} już istnieje w bazie"
                                     )
 
-                                # Zwracamy pomiar
                                 return {
                                     "stan_wody": [
                                         {
@@ -242,12 +230,10 @@ class IMGWService:
         try:
             warnings = await self.get_warnings()
             for warning_data in warnings:
-                # Parsuj daty
                 warning_data['opublikowano'] = datetime.strptime(warning_data['opublikowano'], '%Y-%m-%d %H:%M:%S')
                 warning_data['data_od'] = datetime.strptime(warning_data['data_od'], '%Y-%m-%d %H:%M:%S')
                 warning_data['data_do'] = datetime.strptime(warning_data['data_do'], '%Y-%m-%d %H:%M:%S')
 
-                # Sprawdź czy ostrzeżenie już istnieje (unikalne po numer + biuro + opublikowano)
                 existing = self.db_service.db.query(HydroWarning).filter(
                     HydroWarning.numer == warning_data['numer'],
                     HydroWarning.biuro == warning_data['biuro'],
@@ -268,9 +254,8 @@ class IMGWService:
                         komentarz=warning_data['komentarz']
                     )
                     self.db_service.db.add(new_warning)
-                    self.db_service.db.flush()  # Aby dostać ID
+                    self.db_service.db.flush()
 
-                    # Dodaj obszary
                     for area in warning_data['obszary']:
                         new_area = WarningArea(
                             warning_id=new_warning.id,

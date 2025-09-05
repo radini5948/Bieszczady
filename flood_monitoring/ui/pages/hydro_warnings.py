@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import List, Dict
 from flood_monitoring.ui.services.api_service import get_warnings
 
-# Funkcje pomocnicze
 def aggregate_warnings_by_woj(warnings: List[Dict]) -> Dict[str, List[Dict]]:
     """Agreguj ostrzeżenia po województwach"""
     woj_warnings = {}
@@ -23,15 +22,15 @@ def aggregate_warnings_by_woj(warnings: List[Dict]) -> Dict[str, List[Dict]]:
 def get_color(max_stopien: str) -> str:
     """Zwraca kolor na podstawie najwyższego stopnia ostrzeżenia"""
     if max_stopien == "3":
-        return "#ff0000"  # Czerwony
+        return "#ff0000"
     elif max_stopien == "2":
-        return "#ffa500"  # Pomarańczowy
+        return "#ffa500"
     elif max_stopien == "1":
-        return "#ffff00"  # Żółty
+        return "#ffff00"
     elif max_stopien == "-1":
-        return "#87ceeb"  # Niebieski dla suszy hydrologicznej
+        return "#87ceeb"
     else:
-        return "#ffffff"  # Biały
+        return "#ffffff"
 
 def popup_html_for_woj(woj_name: str, woj_warnings: Dict[str, List[Dict]]) -> str:
     """Tworzy HTML do popupa dla województwa"""
@@ -41,22 +40,19 @@ def popup_html_for_woj(woj_name: str, woj_warnings: Dict[str, List[Dict]]) -> st
     for warning in woj_warnings[woj_name]:
         html += f"<li><b>{warning['zdarzenie']}</b> (stopień {warning['stopien']})<br>"
         html += f"Od: {warning['data_od']} Do: {warning['data_do']}<br>"
-        html += f"Komentarz: {warning.get('komentarz', '-')}</li><br>"
+        html += f"Komentarz: {warning.get('przebieg', '-')}</li><br>"
     html += "</ul>"
     return html
 
 def show_hydro_warnings():
     """Wyświetl stronę ostrzeżeń hydrologicznych"""
-    
-    # --- Główna strona ---
-    st.title("⚠️ Mapa Ostrzeżeń Hydrologicznych")
+
+    st.title("️Mapa Ostrzeżeń Hydrologicznych")
     st.markdown("""Monitoruj aktualne ostrzeżenia hydrologiczne w Polsce z zaawansowanymi narzędziami analizy i filtrowania.""")
 
-    # Sidebar z opcjami filtrowania
     with st.sidebar:
-        st.header("🔧 Opcje filtrowania")
-        
-        # Filtr poziomu ostrzeżeń
+        st.header(" Opcje filtrowania")
+
         warning_levels = st.multiselect(
             "Poziomy ostrzeżeń:",
             options=["-1", "1", "2", "3"],
@@ -65,42 +61,36 @@ def show_hydro_warnings():
         )
         
         st.divider()
-        
-        # Opcje wyświetlania
-        st.subheader("📊 Opcje wyświetlania")
+
+        st.subheader(" Opcje wyświetlania")
         show_details = st.checkbox("Pokaż szczegóły ostrzeżeń", value=True)
         group_by_province = st.checkbox("Grupuj według województw", value=True)
         show_statistics = st.checkbox("Pokaż statystyki", value=True)
         
         st.divider()
-        
-        # Przycisk do czyszczenia cache
-        if st.button("🔄 Odśwież dane ostrzeżeń", help="Wyczyść cache i pobierz najnowsze dane"):
+
+        if st.button(" Odśwież dane ostrzeżeń", help="Wyczyść cache i pobierz najnowsze dane"):
             st.cache_data.clear()
             st.rerun()
         
         st.divider()
-        
-        # Selektor widoku mapy
-        st.subheader("🗺️ Widok mapy")
+
+        st.subheader(" Widok mapy")
         map_view = st.selectbox(
             "Styl mapy:",
             options=["OpenStreetMap", "Satellite", "Terrain"],
             index=0
         )
 
-    # Pobierz ostrzeżenia
     try:
         warnings = get_warnings()
-        st.success(f"✅ Pobrano {len(warnings)} ostrzeżeń")
-        
-        # Filtruj według poziomu
+        st.success(f" Pobrano {len(warnings)} ostrzeżeń")
+
         if warning_levels:
             warnings = [w for w in warnings if str(w.get('stopien', 1)) in warning_levels]
-        
-        # Statystyki ostrzeżeń
+
         if show_statistics:
-            st.subheader("📊 Statystyki ostrzeżeń")
+            st.subheader(" Statystyki ostrzeżeń")
             
             total_warnings = len(warnings)
             level_minus1 = len([w for w in warnings if str(w.get('stopien', 1)) == '-1'])
@@ -122,14 +112,11 @@ def show_hydro_warnings():
                 st.metric("🔴 Poziom 3", level_3)
             
             st.divider()
-        
-        # Agreguj ostrzeżenia po województwach
+
         woj_warnings = aggregate_warnings_by_woj(warnings)
-        
-        # Mapa ostrzeżeń
-        st.subheader("🗺️ Mapa ostrzeżeń hydrologicznych")
-        
-        # Selektor widoku mapy
+
+        st.subheader(" Mapa ostrzeżeń hydrologicznych")
+
         col1, col2 = st.columns([3, 1])
         
         with col2:
@@ -141,10 +128,8 @@ def show_hydro_warnings():
             st.markdown("⚪ Brak ostrzeżeń")
         
         with col1:
-            # Tworzenie mapy
             m = folium.Map(location=[52.0, 19.0], zoom_start=6)
-            
-            # Dodaj warstwy mapy w zależności od wyboru
+
             if map_view == "Satellite":
                 folium.TileLayer(
                     tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -161,8 +146,7 @@ def show_hydro_warnings():
                     overlay=False,
                     control=True
                 ).add_to(m)
-            
-            # Współrzędne województw (uproszczone)
+
             wojewodztwa_coords = {
                 "dolnośląskie": [51.1, 17.0],
                 "kujawsko-pomorskie": [53.0, 18.0],
@@ -181,8 +165,7 @@ def show_hydro_warnings():
                 "wielkopolskie": [52.4, 17.0],
                 "zachodniopomorskie": [53.4, 15.6]
             }
-            
-            # Dodaj markery dla województw z ostrzeżeniami
+
             markers_added = 0
             for woj, coords in wojewodztwa_coords.items():
                 if woj in woj_warnings:
@@ -200,7 +183,6 @@ def show_hydro_warnings():
                     ).add_to(m)
                     markers_added += 1
                 else:
-                    # Województwa bez ostrzeżeń
                     folium.CircleMarker(
                         location=coords,
                         radius=8,
@@ -212,15 +194,12 @@ def show_hydro_warnings():
                     ).add_to(m)
             
 
-            
-            # Wyświetl mapę
+
             folium_static(m, width=700, height=500)
-        
-        # Szczegóły ostrzeżeń
+
         if show_details and warnings:
-            st.subheader("📋 Szczegóły ostrzeżeń")
-            
-            # Filtr województw
+            st.subheader(" Szczegóły ostrzeżeń")
+
             selected_wojewodztwa = st.multiselect(
                 "Wybierz województwa do wyświetlenia:",
                 options=list(woj_warnings.keys()),
@@ -229,7 +208,6 @@ def show_hydro_warnings():
             )
             
             if selected_wojewodztwa:
-                # Opcje sortowania
                 col1, col2 = st.columns(2)
                 
                 with col1:
@@ -248,17 +226,16 @@ def show_hydro_warnings():
                 
                 for woj in selected_wojewodztwa:
                     warnings_list = woj_warnings[woj]
-                    
-                    # Sortuj ostrzeżenia w województwie
+
                     if sort_by == "Poziom ostrzeżenia":
                         warnings_list = sorted(warnings_list, key=lambda x: x.get('stopien', 1), reverse=(sort_order == "Malejąco"))
                     elif sort_by == "Numer":
                         warnings_list = sorted(warnings_list, key=lambda x: x.get('numer', ''), reverse=(sort_order == "Malejąco"))
                     
-                    with st.expander(f"🏛️ {woj} ({len(warnings_list)} {'ostrzeżenie' if len(warnings_list) == 1 else 'ostrzeżenia' if len(warnings_list) < 5 else 'ostrzeżeń'})", expanded=False):
+                    with st.expander(f"️ {woj} ({len(warnings_list)} {'ostrzeżenie' if len(warnings_list) == 1 else 'ostrzeżenia' if len(warnings_list) < 5 else 'ostrzeżeń'})", expanded=False):
                         for i, warning in enumerate(warnings_list):
                             level = warning.get('stopien', 1)
-                            level_emoji = "🟡" if level == "1" else "🟠" if level == "2" else "🔴"
+                            level_emoji = "🔵" if level =="-1" else "🟡" if level == "1" else "🟠" if level == "2" else  level =="3"
                             
                             col1, col2 = st.columns([1, 3])
                             
@@ -268,25 +245,25 @@ def show_hydro_warnings():
                             
                             with col2:
                                 st.markdown(f"""
-                                **📋 Numer:** {warning.get('numer', 'Nieznany')}
-                                **📅 Opublikowano:** {warning.get('opublikowano', 'Nieznana')}
-                                **⏰ Od:** {warning.get('data_od', 'Nieznana')} **Do:** {warning.get('data_do', 'Nieznana')}
-                                **🌊 Zdarzenie:** {warning.get('zdarzenie', 'Nieznane')}
-                                **📊 Prawdopodobieństwo:** {warning.get('prawdopodobienstwo', 'Nieznane')}
-                                **📝 Przebieg:** {warning.get('przebieg', 'Brak opisu')}
-                                **💬 Komentarz:** {warning.get('komentarz', 'Brak komentarza')}
+                                ** Numer:** {warning.get('numer', 'Nieznany')}
+                                ** Opublikowano:** {warning.get('opublikowano', 'Nieznana')}
+                                ** Od:** {warning.get('data_od', 'Nieznana')} **Do:** {warning.get('data_do', 'Nieznana')}
+                                ** Zdarzenie:** {warning.get('zdarzenie', 'Nieznane')}
+                                ** Prawdopodobieństwo:** {warning.get('prawdopodobienstwo', 'Nieznane')}
+                                ** Przebieg:** {warning.get('przebieg', 'Brak opisu')}
+                                ** Komentarz:** {warning.get('komentarz', 'Brak komentarza')}
                                 """)
                                 
                                 if warning.get("obszary"):
-                                    st.write("**🗺️ Obszary:**")
+                                    st.write("** Obszary:**")
                                     for area in warning["obszary"]:
                                         st.write(f"- {area.get('wojewodztwo', 'Nieznane')}: {area.get('opis', 'Brak opisu')}")
                             
                             if i < len(warnings_list) - 1:
                                 st.divider()
             else:
-                st.info("ℹ️ Brak ostrzeżeń do wyświetlenia")
+                st.info("️ Brak ostrzeżeń do wyświetlenia")
         
     except Exception as e:
-        st.error(f"❌ Błąd podczas pobierania ostrzeżeń: {str(e)}")
-        st.info("💡 Sprawdź połączenie z API lub spróbuj ponownie później.")
+        st.error(f" Błąd podczas pobierania ostrzeżeń: {str(e)}")
+        st.info(" Sprawdź połączenie z API lub spróbuj ponownie później.")

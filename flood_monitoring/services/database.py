@@ -1,6 +1,3 @@
-"""
-Serwis do obsługi bazy danych
-"""
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
@@ -70,7 +67,6 @@ class DatabaseService:
         self, station_id: str, stan_wody_data_pomiaru: datetime, stan_wody: float
     ) -> bool:
         """Dodaj pomiar stanu wody. Zwraca True jeśli dodano nowy pomiar, False jeśli już istniał."""
-        # Sprawdź czy pomiar już istnieje
         existing = (
             self.db.query(StanMeasurement)
             .filter_by(station_id=station_id, stan_wody_data_pomiaru=stan_wody_data_pomiaru)
@@ -96,7 +92,6 @@ class DatabaseService:
         self, station_id: str, przeplyw_data: datetime, przelyw: float
     ) -> bool:
         """Dodaj pomiar przepływu. Zwraca True jeśli dodano nowy pomiar, False jeśli już istniał."""
-        # Sprawdź czy pomiar już istnieje
         existing = (
             self.db.query(PrzeplywMeasurement)
             .filter_by(station_id=station_id, przeplyw_data=przeplyw_data)
@@ -129,7 +124,6 @@ class DatabaseService:
 
         logger.info(f"Fetching measurements for station {station_id} from {start_date}")
 
-        # Pobierz pomiary stanu wody z sortowaniem chronologicznym
         stan_measurements = (
             self.db.query(StanMeasurement)
             .filter(
@@ -140,7 +134,6 @@ class DatabaseService:
             .all()
         )
 
-        # Pobierz pomiary przepływu z sortowaniem chronologicznym
         przeplyw_measurements = (
             self.db.query(PrzeplywMeasurement)
             .filter(
@@ -168,8 +161,7 @@ class DatabaseService:
     def get_station_measurements_extended(self, station_id: str, days: int = 1, limit: int = 100) -> Dict[str, List[Dict[str, Any]]]:
         """Pobierz rozszerzone pomiary z konkretnej stacji z większą ilością punktów danych dla wykresów"""
         start_date = datetime.now() - timedelta(days=days)
-        
-        # Pobierz pomiary stanu wody z ograniczeniem i sortowaniem chronologicznym
+
         stan_measurements = (
             self.db.query(StanMeasurement)
             .filter(
@@ -180,8 +172,7 @@ class DatabaseService:
             .limit(limit)
             .all()
         )
-        
-        # Pobierz pomiary przepływu z ograniczeniem i sortowaniem chronologicznym
+
         przeplyw_measurements = (
             self.db.query(PrzeplywMeasurement)
             .filter(
@@ -193,7 +184,6 @@ class DatabaseService:
             .all()
         )
 
-        # Odwróć kolejność aby mieć chronologiczny porządek (od najstarszych do najnowszych)
         stan_measurements.reverse()
         przeplyw_measurements.reverse()
 
@@ -214,8 +204,7 @@ class DatabaseService:
     def get_station_measurements_batch(self, station_id: str, days: int = 1, batch_size: int = 50, offset: int = 0) -> Dict[str, List[Dict[str, Any]]]:
         """Pobierz pomiary w partiach dla lepszej wydajności przy dużych zbiorach danych"""
         start_date = datetime.now() - timedelta(days=days)
-        
-        # Pobierz pomiary stanu wody w partiach
+
         stan_measurements = (
             self.db.query(StanMeasurement)
             .filter(
@@ -227,8 +216,7 @@ class DatabaseService:
             .limit(batch_size)
             .all()
         )
-        
-        # Pobierz pomiary przepływu w partiach
+
         przeplyw_measurements = (
             self.db.query(PrzeplywMeasurement)
             .filter(
@@ -241,7 +229,6 @@ class DatabaseService:
             .all()
         )
 
-        # Odwróć kolejność aby mieć chronologiczny porządek
         stan_measurements.reverse()
         przeplyw_measurements.reverse()
 
@@ -263,7 +250,6 @@ class DatabaseService:
 
     def get_latest_measurements_for_all_stations(self) -> Dict[str, Dict[str, Any]]:
         """Pobierz najnowsze pomiary dla wszystkich stacji"""
-        # Pobierz najnowszy pomiar stanu wody dla każdej stacji
         latest_stan_subquery = (
             self.db.query(
                 StanMeasurement.station_id,
@@ -284,8 +270,7 @@ class DatabaseService:
             )
             .all()
         )
-        
-        # Pobierz najnowszy pomiar przepływu dla każdej stacji
+
         latest_przeplyw_subquery = (
             self.db.query(
                 PrzeplywMeasurement.station_id,
@@ -306,18 +291,15 @@ class DatabaseService:
             )
             .all()
         )
-        
-        # Organizuj dane według station_id
+
         result = {}
-        
-        # Dodaj pomiary stanu wody
+
         for measurement in latest_stan_measurements:
             if measurement.station_id not in result:
                 result[measurement.station_id] = {}
             result[measurement.station_id]['stan_wody'] = measurement.stan_wody
             result[measurement.station_id]['stan_wody_data_pomiaru'] = measurement.stan_wody_data_pomiaru
-        
-        # Dodaj pomiary przepływu
+
         for measurement in latest_przeplyw_measurements:
             if measurement.station_id not in result:
                 result[measurement.station_id] = {}

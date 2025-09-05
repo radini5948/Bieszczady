@@ -85,7 +85,7 @@ def create_water_level_chart(data: Dict[str, List[Dict[str, Any]]], station_name
         ))
     
     fig.update_layout(
-        title=f"📊 Poziom wody - {station_name}" if station_name else "📊 Poziom wody",
+        title=f" Poziom wody - {station_name}" if station_name else " Poziom wody",
         xaxis_title="Data i czas",
         yaxis_title="Poziom wody [cm]",
         hovermode='x unified',
@@ -155,7 +155,7 @@ def create_flow_chart(data: Dict[str, List[Dict[str, Any]]], station_name: str =
     )
     
     fig.update_layout(
-        title=f"🌊 Przepływ - {station_name}" if station_name else "🌊 Przepływ",
+        title=f" Przepływ - {station_name}" if station_name else " Przepływ",
         xaxis_title="Data i czas",
         yaxis_title="Przepływ [m³/s]",
         hovermode='x unified',
@@ -170,19 +170,16 @@ def create_flow_chart(data: Dict[str, List[Dict[str, Any]]], station_name: str =
 def display_station_charts(data: Dict[str, List[Dict[str, Any]]], station_name: str = ""):
     """Wyświetl zaawansowane wykresy dla stacji z dodatkowymi analizami"""
     try:
-        # Sprawdź dostępność danych
         has_water_data = bool(data.get("stan"))
         has_flow_data = bool(data.get("przelyw"))
         
         if not has_water_data and not has_flow_data:
-            st.warning("⚠️ Brak danych dla wybranej stacji")
+            st.warning("️ Brak danych dla wybranej stacji")
             return
-        
-        # Nagłówek z informacjami o stacji
+
         if station_name:
-            st.subheader(f"📊 Analiza danych - {station_name}")
-        
-        # Statystyki w metrykach
+            st.subheader(f" Analiza danych - {station_name}")
+
         if has_water_data or has_flow_data:
             col1, col2, col3, col4 = st.columns(4)
             
@@ -193,14 +190,14 @@ def display_station_charts(data: Dict[str, List[Dict[str, Any]]], station_name: 
                 
                 with col1:
                     st.metric(
-                        "💧 Aktualny poziom",
+                        " Aktualny poziom",
                         f"{latest_water:.1f} cm",
                         delta=f"{latest_water - avg_water:.1f} cm od średniej"
                     )
                 
                 with col2:
                     st.metric(
-                        "📈 Średni poziom",
+                        " Średni poziom",
                         f"{avg_water:.1f} cm",
                         help="Średni poziom wody w analizowanym okresie"
                     )
@@ -212,19 +209,18 @@ def display_station_charts(data: Dict[str, List[Dict[str, Any]]], station_name: 
                 
                 with col3:
                     st.metric(
-                        "🌊 Aktualny przepływ",
+                        " Aktualny przepływ",
                         f"{latest_flow:.2f} m³/s",
                         delta=f"{latest_flow - avg_flow:.2f} m³/s od średniej"
                     )
                 
                 with col4:
                     st.metric(
-                        "📊 Średni przepływ",
+                        " Średni przepływ",
                         f"{avg_flow:.2f} m³/s",
                         help="Średni przepływ w analizowanym okresie"
                     )
-        
-        # Wykresy w dwóch kolumnach
+
         if has_water_data and has_flow_data:
             col1, col2 = st.columns(2)
             
@@ -238,28 +234,25 @@ def display_station_charts(data: Dict[str, List[Dict[str, Any]]], station_name: 
                 if flow_fig:
                     st.plotly_chart(flow_fig, use_container_width=True)
         else:
-            # Jeden wykres na całą szerokość
             if has_water_data:
                 water_level_fig = create_water_level_chart(data, station_name)
                 if water_level_fig:
                     st.plotly_chart(water_level_fig, use_container_width=True)
                 else:
-                    st.info("📊 Brak danych o poziomie wody")
-            
+                    st.info(" Brak danych o poziomie wody")
             if has_flow_data:
                 flow_fig = create_flow_chart(data, station_name)
                 if flow_fig:
                     st.plotly_chart(flow_fig, use_container_width=True)
                 else:
-                    st.info("🌊 Brak danych o przepływie")
-        
-        # Dodatkowa analiza statystyczna
-        st.markdown("### 📈 Szczegółowa analiza statystyczna")
+                    st.info(" Brak danych o przepływie")
+
+        st.markdown("###  Szczegółowa analiza statystyczna")
         col1, col2 = st.columns(2)
         
         if has_water_data:
             with col1:
-                st.markdown("**💧 Poziom wody:**")
+                st.markdown("** Poziom wody:**")
                 water_df = pd.DataFrame(data["stan"])
                 st.write(f"• Minimum: {water_df['stan_wody'].min():.1f} cm")
                 st.write(f"• Maksimum: {water_df['stan_wody'].max():.1f} cm")
@@ -268,7 +261,7 @@ def display_station_charts(data: Dict[str, List[Dict[str, Any]]], station_name: 
         
         if has_flow_data:
             with col2:
-                st.markdown("**🌊 Przepływ:**")
+                st.markdown("** Przepływ:**")
                 flow_df = pd.DataFrame(data["przelyw"])
                 st.write(f"• Minimum: {flow_df['przelyw'].min():.2f} m³/s")
                 st.write(f"• Maksimum: {flow_df['przelyw'].max():.2f} m³/s")
@@ -277,12 +270,12 @@ def display_station_charts(data: Dict[str, List[Dict[str, Any]]], station_name: 
 
     except Exception as e:
         st.error(f"❌ Błąd podczas przetwarzania danych: {str(e)}")
-        st.markdown("**🔍 Szczegóły błędu (dla deweloperów):**")
+        st.markdown("** Szczegóły błędu (dla deweloperów):**")
         st.write("Raw data:", data)
         st.exception(e)
 
 
-@st.cache_data(ttl=300)  # Cache na 5 minut
+@st.cache_data(ttl=300)
 def create_comparison_chart(stations_data: Dict[str, Dict]) -> go.Figure:
     """Utwórz zaawansowany wykres porównawczy poziomów wody dla wielu stacji"""
     if not stations_data:
@@ -298,16 +291,14 @@ def create_comparison_chart(stations_data: Dict[str, Dict]) -> go.Figure:
             df = pd.DataFrame(data["stan"])
             df["stan_wody_data_pomiaru"] = pd.to_datetime(df["stan_wody_data_pomiaru"])
             df = df.sort_values("stan_wody_data_pomiaru")
-            
-            # Oblicz statystyki dla każdej stacji
+
             mean_level = df["stan_wody"].mean()
             max_level = df["stan_wody"].max()
             min_level = df["stan_wody"].min()
             station_stats[station_name] = {'mean': mean_level, 'max': max_level, 'min': min_level}
             
             color = colors[i % len(colors)]
-            
-            # Główna linia
+
             fig.add_trace(
                 go.Scatter(
                     x=df["stan_wody_data_pomiaru"],
@@ -319,8 +310,7 @@ def create_comparison_chart(stations_data: Dict[str, Dict]) -> go.Figure:
                     hovertemplate=f'<b>{station_name}</b><br>Data: %{{x}}<br>Poziom: %{{y}} cm<extra></extra>'
                 )
             )
-            
-            # Linia średniej dla każdej stacji (opcjonalnie)
+
             fig.add_trace(
                 go.Scatter(
                     x=df["stan_wody_data_pomiaru"],
@@ -335,7 +325,7 @@ def create_comparison_chart(stations_data: Dict[str, Dict]) -> go.Figure:
             )
 
     fig.update_layout(
-        title="📊 Porównanie poziomów wody między stacjami",
+        title=" Porównanie poziomów wody między stacjami",
         xaxis_title="Data i czas",
         yaxis_title="Poziom wody [cm]",
         hovermode="x unified",
@@ -354,7 +344,7 @@ def create_comparison_chart(stations_data: Dict[str, Dict]) -> go.Figure:
     return fig
 
 
-@st.cache_data(ttl=300)  # Cache na 5 minut
+@st.cache_data(ttl=300)
 def create_flow_comparison_chart(stations_data: Dict[str, Dict]) -> go.Figure:
     """Utwórz zaawansowany wykres porównawczy przepływów dla wielu stacji"""
     if not stations_data:
@@ -370,16 +360,14 @@ def create_flow_comparison_chart(stations_data: Dict[str, Dict]) -> go.Figure:
             df = pd.DataFrame(data["przelyw"])
             df["przeplyw_data"] = pd.to_datetime(df["przeplyw_data"])
             df = df.sort_values("przeplyw_data")
-            
-            # Oblicz statystyki
+
             mean_flow = df["przelyw"].mean()
             max_flow = df["przelyw"].max()
             min_flow = df["przelyw"].min()
             station_stats[station_name] = {'mean': mean_flow, 'max': max_flow, 'min': min_flow}
             
             color = colors[i % len(colors)]
-            
-            # Główna linia z wypełnieniem
+
             fig.add_trace(
                 go.Scatter(
                     x=df["przeplyw_data"],
@@ -393,8 +381,7 @@ def create_flow_comparison_chart(stations_data: Dict[str, Dict]) -> go.Figure:
                     hovertemplate=f'<b>{station_name}</b><br>Data: %{{x}}<br>Przepływ: %{{y}} m³/s<extra></extra>'
                 )
             )
-            
-            # Linia średniej
+
             fig.add_trace(
                 go.Scatter(
                     x=df["przeplyw_data"],
@@ -409,7 +396,7 @@ def create_flow_comparison_chart(stations_data: Dict[str, Dict]) -> go.Figure:
             )
 
     fig.update_layout(
-        title="🌊 Porównanie przepływów między stacjami",
+        title=" Porównanie przepływów między stacjami",
         xaxis_title="Data i czas",
         yaxis_title="Przepływ [m³/s]",
         hovermode="x unified",

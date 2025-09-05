@@ -155,21 +155,17 @@ def show_home():
     # Nagłówek główny
     st.markdown("""
     <div class="main-header">
-        <h1 class="cursor cursor-h1 typewriter-animation-h1">🌊 System Monitorowania Zagrożeń Powodziowych</h1>
+        <h1 class="cursor cursor-h1 typewriter-animation-h1"> System Monitorowania Zagrożeń Powodziowych</h1>
         <p class="cursor cursor-p typewriter-animation-p no-cursor">Kompleksowe narzędzie do monitorowania stanu wód w Polsce</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Dashboard z metrykami
-    st.subheader("📊 Dashboard systemu")
-    
-    # Pobierz dane z API (z obsługą błędów)
+    st.subheader(" Dashboard systemu")
+
     try:
-        # Liczba stacji
         stations_response = requests.get(f"{BACKEND_URL}/stations/", timeout=5)
         if stations_response.status_code == 200:
             stations_data = stations_response.json()
-            # Pobierz liczbę stacji z tablicy 'features' w GeoJSON
             stations_count = len(stations_data.get('features', []))
         else:
             stations_count = "N/A"
@@ -177,61 +173,58 @@ def show_home():
         stations_count = "N/A"
     
     try:
-        # Liczba ostrzeżeń
         warnings_response = requests.get(f"{BACKEND_URL}/warnings/", timeout=5)
         warnings_count = len(warnings_response.json()) if warnings_response.status_code == 200 else "N/A"
     except:
         warnings_count = "N/A"
-    
-    # Wyświetl metryki
+
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric(
-            label="🏭 Stacje pomiarowe",
+            label=" Stacje pomiarowe",
             value=stations_count,
             help="Łączna liczba stacji hydrologicznych w systemie"
         )
     
     with col2:
         st.metric(
-            label="⚠️ Aktywne ostrzeżenia",
+            label="️ Aktywne ostrzeżenia",
             value=warnings_count,
             help="Liczba aktywnych ostrzeżeń hydrologicznych"
         )
     
     with col3:
         st.metric(
-            label="🕐 Ostatnia aktualizacja",
+            label=" Ostatnia aktualizacja",
             value=datetime.now().strftime("%H:%M"),
             help="Czas ostatniej aktualizacji danych"
         )
     
     with col4:
         st.metric(
-            label="📡 Status systemu",
+            label=" Status systemu",
             value="🟢 Aktywny",
             help="Aktualny status działania systemu"
         )
     
     st.divider()
-    
-    # Sekcja funkcji
-    st.subheader("🚀 Funkcje systemu")
+
+    st.subheader(" Funkcje systemu")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
         <div class="feature-card">
-            <h4>🗺️ Mapa stacji pomiarowych</h4>
+            <h4> Mapa stacji pomiarowych</h4>
             <p>Interaktywna mapa z lokalizacjami wszystkich stacji hydrologicznych w Polsce. 
             Możliwość filtrowania według województw, rzek i statusu stacji.</p>
             <ul>
-                <li>📍 Lokalizacje stacji</li>
-                <li>📊 Dane pomiarowe</li>
-                <li>📈 Wykresy trendów</li>
-                <li>🔍 Zaawansowane filtry</li>
+                <li> Lokalizacje stacji</li>
+                <li> Dane pomiarowe</li>
+                <li> Wykresy trendów</li>
+                <li> Zaawansowane filtry</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -239,14 +232,14 @@ def show_home():
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <h4>⚠️ Mapa ostrzeżeń hydrologicznych</h4>
+            <h4>️ Mapa ostrzeżeń hydrologicznych</h4>
             <p>Wizualizacja aktualnych ostrzeżeń hydrologicznych z podziałem na województwa. 
             Kolorowe oznaczenia według poziomu zagrożenia.</p>
             <ul>
                 <li>🟡 Ostrzeżenia 1. stopnia</li>
                 <li>🟠 Ostrzeżenia 2. stopnia</li>
                 <li>🔴 Ostrzeżenia 3. stopnia</li>
-                <li>📋 Szczegółowe informacje</li>
+                <li> Szczegółowe informacje</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
@@ -254,24 +247,22 @@ def show_home():
     with col3:
         st.markdown("""
         <div class="feature-card">
-            <h4>📊 Analiza danych</h4>
+            <h4> Analiza danych</h4>
             <p>Zaawansowane narzędzia do analizy danych hydrologicznych. 
             Porównania między stacjami i analiza trendów czasowych.</p>
             <ul>
-                <li>📈 Wykresy interaktywne</li>
-                <li>📉 Analiza statystyczna</li>
-                <li>🔄 Porównania stacji</li>
-                <li>💾 Eksport danych</li>
+                <li> Wykresy interaktywne</li>
+                <li> Analiza statystyczna</li>
+                <li> Porównania stacji</li>
+                <li> Eksport danych</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
     
     st.divider()
-    
-    # Szybkie akcje
+
     st.subheader("⚡ Szybkie akcje")
-    
-    # Inicjalizacja session state dla zarządzania stanem przycisków
+
     if 'sync_in_progress' not in st.session_state:
         st.session_state.sync_in_progress = False
     if 'last_action_time' not in st.session_state:
@@ -284,9 +275,8 @@ def show_home():
         import time
         
         current_time = time.time()
-        # Debouncing - zapobieganie zbyt szybkim kliknięciom (min 1 sekunda między akcjami)
         if current_time - st.session_state.last_action_time < 1.0:
-            st.warning(f"⏳ Poczekaj chwilę przed kolejną akcją ({action_name})")
+            st.warning(f" Poczekaj chwilę przed kolejną akcją ({action_name})")
             return None
             
         st.session_state.last_action_time = current_time
@@ -303,11 +293,11 @@ def show_home():
             
         except requests.exceptions.Timeout:
             st.session_state.sync_in_progress = False
-            st.error(f"⏰ Przekroczono limit czasu dla {action_name}")
+            st.error(f" Przekroczono limit czasu dla {action_name}")
             return None
         except requests.exceptions.ConnectionError:
             st.session_state.sync_in_progress = False
-            st.error(f"🔌 Błąd połączenia z API podczas {action_name}")
+            st.error(f" Błąd połączenia z API podczas {action_name}")
             return None
         except requests.exceptions.RequestException as e:
             st.session_state.sync_in_progress = False
@@ -319,7 +309,7 @@ def show_home():
             return None
     
     with col1:
-        if st.button("🔄 Synchronizuj wszystkie dane", use_container_width=True, disabled=st.session_state.sync_in_progress):
+        if st.button(" Synchronizuj wszystkie dane", use_container_width=True, disabled=st.session_state.sync_in_progress):
             with st.spinner("Synchronizacja w toku..."):
                 response = safe_api_call(f"{BACKEND_URL}/sync/all/", method='POST', timeout=30, action_name="synchronizacji wszystkich danych")
                 if response and response.status_code == 200:
@@ -328,16 +318,16 @@ def show_home():
                     st.error(f"❌ Błąd podczas synchronizacji (kod: {response.status_code})")
     
     with col2:
-        if st.button("🏭 Synchronizuj stacje", use_container_width=True, disabled=st.session_state.sync_in_progress):
+        if st.button(" Synchronizuj stacje", use_container_width=True, disabled=st.session_state.sync_in_progress):
             with st.spinner("Synchronizacja stacji..."):
-                response = safe_api_call(f"{BACKEND_URL}/sync/stations/", method='POST', timeout=15, action_name="synchronizacji stacji")
+                response = safe_api_call(f"{BACKEND_URL}/sync/stations/", method='POST', timeout=300, action_name="synchronizacji stacji")
                 if response and response.status_code == 200:
                     st.success("✅ Stacje zsynchronizowane")
                 elif response:
                     st.error(f"❌ Błąd synchronizacji stacji (kod: {response.status_code})")
     
     with col3:
-        if st.button("⚠️ Synchronizuj ostrzeżenia", use_container_width=True, disabled=st.session_state.sync_in_progress):
+        if st.button(" Synchronizuj ostrzeżenia", use_container_width=True, disabled=st.session_state.sync_in_progress):
             with st.spinner("Synchronizacja ostrzeżeń..."):
                 response = safe_api_call(f"{BACKEND_URL}/sync/warnings/", method='POST', timeout=10, action_name="synchronizacji ostrzeżeń")
                 if response and response.status_code == 200:
@@ -346,25 +336,24 @@ def show_home():
                     st.error(f"❌ Błąd synchronizacji ostrzeżeń (kod: {response.status_code})")
     
     with col4:
-        if st.button("📊 Sprawdź status API", use_container_width=True, disabled=st.session_state.sync_in_progress):
+        if st.button(" Sprawdź status API", use_container_width=True, disabled=st.session_state.sync_in_progress):
             response = safe_api_call(f"{BACKEND_URL}/health/", method='GET', timeout=5, action_name="sprawdzania statusu API")
             if response and response.status_code == 200:
                 st.success("✅ API działa prawidłowo")
             elif response:
-                st.warning(f"⚠️ API odpowiada, ale może mieć problemy (kod: {response.status_code})")
+                st.warning(f"️ API odpowiada, ale może mieć problemy (kod: {response.status_code})")
 
-    # Informacje o systemie
-    with st.expander("ℹ️ Informacje o systemie", expanded=False):
+    with st.expander("️ Informacje o systemie", expanded=False):
         col1, col2 = st.columns(2)
         
         with col1:
             st.markdown("""
-            **📋 O projekcie:**
+            ** O projekcie:**
             - System monitorowania zagrożeń powodziowych
             - Dane z Instytutu Meteorologii i Gospodarki Wodnej (IMGW)
             - Projekt na przedmiot Programowanie Aplikacji Geoinformatycznych
             
-            **🔧 Technologie:**
+            ** Technologie:**
             - Backend: FastAPI + PostgreSQL
             - Frontend: Streamlit
             - Mapy: Folium
@@ -373,22 +362,21 @@ def show_home():
         
         with col2:
             st.markdown("""
-            **📊 Źródła danych:**
+            ** Źródła danych:**
             - IMGW-PIB (Instytut Meteorologii i Gospodarki Wodnej)
             - Dane hydrologiczne w czasie rzeczywistym
             - Ostrzeżenia meteorologiczne i hydrologiczne
             
-            **🔄 Aktualizacja:**
+            ** Aktualizacja:**
             - Dane stacji: na żądanie
             - Ostrzeżenia: automatycznie
             - Pomiary: co 1 godzina (IMGW)
             """)
 
-    # Stopka
     st.markdown("---")
     st.markdown("""
     <div style="text-align: center; color: #666; padding: 1rem;">
-        💧 System Monitorowania Zagrożeń Powodziowych | Powered by IMGW-PIB | 
-        <a href="http://localhost:8000/docs" target="_blank">📖 Dokumentacja API</a>
+         System Monitorowania Zagrożeń Powodziowych | Powered by IMGW-PIB | 
+        <a href="http://localhost:8000/docs" target="_blank"> Dokumentacja API</a>
     </div>
     """, unsafe_allow_html=True)

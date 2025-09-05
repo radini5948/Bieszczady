@@ -1,6 +1,3 @@
-"""
-Model dla stacji pomiarowych
-"""
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, Float, String
 from sqlalchemy.orm import relationship
@@ -9,7 +6,6 @@ from flood_monitoring.core.database import Base
 
 
 class Station(Base):
-    """Model stacji pomiarowej"""
 
     __tablename__ = "stations"
 
@@ -21,7 +17,6 @@ class Station(Base):
     geom = Column(Geometry("POINT", srid=4326), nullable=False)
     wojewodztwo = Column(String, nullable=False)
 
-    # Relacje do pomiarów
     stan_measurements = relationship("StanMeasurement", back_populates="station")
     przeplyw_measurements = relationship(
         "PrzeplywMeasurement", back_populates="station"

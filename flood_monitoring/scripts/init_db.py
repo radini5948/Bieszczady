@@ -1,6 +1,3 @@
-"""
-Skrypt do inicjalizacji bazy danych
-"""
 import time
 
 from sqlalchemy import create_engine

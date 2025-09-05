@@ -1,6 +1,3 @@
-"""
-Router dla endpointów związanych ze stacjami pomiarowymi
-"""
 import logging
 from datetime import datetime
 from typing import List, Optional, Dict, Any
@@ -40,10 +37,10 @@ class StationMeasurements(BaseModel):
     stan: List[StanMeasurement]
     przelyw: List[PrzeplywMeasurement]
 
-
+"""Pobieranie danych w formacie geojson"""
 @router.get("/", response_model=Dict[str, Any])
 async def get_stations(db_service: DatabaseService = Depends(get_database_service)):
-    """Pobierz listę stacji pomiarowych z bazy danych w formacie GeoJSON z najnowszymi pomiarami"""
+
     try:
         stations = db_service.get_all_stations()
         latest_measurements = db_service.get_latest_measurements_for_all_stations()
@@ -81,7 +78,7 @@ async def get_stations(db_service: DatabaseService = Depends(get_database_servic
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+"""Dane dla pojedynczej stacji"""
 @router.get("/{station_id}", response_model=StationMeasurements)
 async def get_station_data(
     station_id: str,
@@ -90,7 +87,7 @@ async def get_station_data(
     limit: int = 100,
     db_service: DatabaseService = Depends(get_database_service),
 ):
-    """Pobierz dane z konkretnej stacji z bazy danych"""
+
     try:
         logger.info(f"Received request for station {station_id} data (extended={extended}, days={days}, limit={limit})")
         

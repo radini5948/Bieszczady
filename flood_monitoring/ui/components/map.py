@@ -13,24 +13,24 @@ import json
 def get_wojewodztwo_emoji(wojewodztwo: str) -> str:
     """Zwraca emoji dla danego województwa."""
     emoji_map = {
-        "dolnośląskie": "⛰️",
-        "kujawsko-pomorskie": "🌾", 
-        "lubelskie": "🌻",
-        "lubuskie": "🌲",
-        "łódzkie": "🏭",
-        "małopolskie": "🏔️",
-        "mazowieckie": "🏛️",
-        "opolskie": "🌿",
-        "podkarpackie": "🦌",
-        "podlaskie": "🦬",
-        "pomorskie": "🌊",
-        "śląskie": "⚒️",
-        "świętokrzyskie": "⛪",
-        "warmińsko-mazurskie": "🦢",
-        "wielkopolskie": "🌾",
-        "zachodniopomorskie": "🏖️"
+        "dolnośląskie": "",
+        "kujawsko-pomorskie": "",
+        "lubelskie": "",
+        "lubuskie": "",
+        "łódzkie": "",
+        "małopolskie": "",
+        "mazowieckie": "",
+        "opolskie": "",
+        "podkarpackie": "",
+        "podlaskie": "",
+        "pomorskie": "",
+        "śląskie": "",
+        "świętokrzyskie": "",
+        "warmińsko-mazurskie": "",
+        "wielkopolskie": "",
+        "zachodniopomorskie": ""
     }
-    return emoji_map.get(wojewodztwo, "🗺️")
+    return emoji_map.get(wojewodztwo, "")
 
 
 def get_status_emoji_and_text(status: str) -> tuple:
@@ -49,10 +49,8 @@ def get_status_emoji_and_text(status: str) -> tuple:
 
 def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", cluster_markers: bool = False, responsive: bool = True) -> folium.Map:
     """Utwórz mapę z lokalizacjami stacji pomiarowych z ulepszonymi funkcjonalnościami OSM"""
-    # Centrum Polski
     center_lat, center_lon = 52.0, 19.0
-    
-    # Dostępne style map z optymalizowanymi opcjami OSM
+
     tile_options = {
         "OpenStreetMap": {
             "tiles": "OpenStreetMap",
@@ -90,31 +88,25 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
             "max_zoom": 15
         }
     }
-    
-    # Utwórz mapę z responsywnymi ustawieniami i lepszą obsługą błędów
+
     map_kwargs = {
         "location": [center_lat, center_lon],
         "zoom_start": 6,
-        "prefer_canvas": True,  # Lepsza wydajność
-        "control_scale": True   # Dodaj skalę
+        "prefer_canvas": True,
+        "control_scale": True
     }
-    
-    # Pobierz konfigurację dla wybranego stylu mapy
+
     style_config = tile_options.get(map_style, tile_options["OpenStreetMap"])
-    
-    # Dodaj konfigurację kafelków do argumentów mapy
+
     map_kwargs.update({
         "tiles": style_config["tiles"],
         "attr": style_config["attr"],
         "max_zoom": style_config["max_zoom"]
     })
-    
-    # Utwórz mapę z optymalizowaną konfiguracją
+
     m = folium.Map(**map_kwargs)
-    
-    # Dodaj dodatkowe warstwy map dla lepszej funkcjonalności OSM
+
     if map_style == "OpenStreetMap":
-        # Dodaj alternatywne warstwy z optymalizowaną konfiguracją
         cartodb_positron = tile_options["CartoDB Positron"]
         folium.TileLayer(
             cartodb_positron["tiles"], 
@@ -148,15 +140,12 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
         ).add_to(m)
         
         folium.LayerControl(position='topright').add_to(m)
-    
-    # Dodaj markery stacji z optymalizacją wydajności
+
     if stations_data:
-        # Ograniczenie liczby markerów dla lepszej wydajności
         max_markers = 500
         limited_stations = stations_data[:max_markers] if len(stations_data) > max_markers else stations_data
         
         if cluster_markers and len(limited_stations) > 50:
-            # Użyj klasterowania dla dużej liczby markerów
             try:
                 from folium.plugins import MarkerCluster
                 marker_cluster = MarkerCluster(
@@ -173,15 +162,13 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
                     }
                     """
                 ).add_to(m)
-                
-                # Dodaj markery do klastra
+
                 for station in limited_stations:
                     try:
                         lat = float(station.get('lat', 0))
                         lon = float(station.get('lon', 0))
                         
                         if lat != 0 and lon != 0:
-                            # Określ kolor markera na podstawie statusu
                             status = station.get('status', 'unknown')
                             if status == 'alarm':
                                 color = 'red'
@@ -195,8 +182,7 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
                             else:
                                 color = 'gray'
                                 icon = 'question'
-                            
-                            # Utwórz popup z informacjami o stacji
+
                             popup_html = f"""
                             <div style="width: 280px; font-family: Arial, sans-serif;">
                                 <h4 style="margin: 0 0 10px 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px;">{station.get('name', 'Nieznana stacja')}</h4>
@@ -205,9 +191,9 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
                                 <p style="margin: 5px 0;"><strong>Województwo:</strong> {station.get('wojewodztwo', 'N/A')}</p>
                                 <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: {color}; font-weight: bold;">{status.upper()}</span></p>
                                 <hr style="margin: 10px 0; border: none; border-top: 1px solid #ecf0f1;">
-                                <p style="margin: 5px 0;"><strong>💧 Stan wody:</strong> {station.get('stan_wody', 'Brak danych')}</p>
-                                <p style="margin: 5px 0;"><strong>🌊 Przepływ:</strong> {station.get('przeplyw', 'Brak danych')}</p>
-                                <p style="margin: 5px 0; font-size: 0.9em; color: #7f8c8d;"><strong>🕒 Ostatnia aktualizacja:</strong><br>{station.get('ostatnia_aktualizacja', 'Brak danych')}</p>
+                                <p style="margin: 5px 0;"><strong> Stan wody:</strong> {station.get('stan_wody', 'Brak danych')}</p>
+                                <p style="margin: 5px 0;"><strong> Przepływ:</strong> {station.get('przeplyw', 'Brak danych')}</p>
+                                <p style="margin: 5px 0; font-size: 0.9em; color: #7f8c8d;"><strong> Ostatnia aktualizacja:</strong><br>{station.get('ostatnia_aktualizacja', 'Brak danych')}</p>
                             </div>
                             """
                             
@@ -229,14 +215,12 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
                 cluster_markers = False
         
         if not cluster_markers:
-            # Dodaj markery bezpośrednio do mapy (bez klasterowania)
             for station in limited_stations:
                 try:
                     lat = float(station.get('lat', 0))
                     lon = float(station.get('lon', 0))
                     
                     if lat != 0 and lon != 0:
-                        # Określ kolor markera na podstawie statusu
                         status = station.get('status', 'unknown')
                         if status == 'alarm':
                             color = 'red'
@@ -250,8 +234,7 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
                         else:
                             color = 'gray'
                             icon = 'question'
-                        
-                        # Utwórz popup z informacjami o stacji
+
                         popup_html = f"""
                         <div style="width: 280px; font-family: Arial, sans-serif;">
                             <h4 style="margin: 0 0 10px 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px;">{station.get('name', 'Nieznana stacja')}</h4>
@@ -260,9 +243,9 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
                             <p style="margin: 5px 0;"><strong>Województwo:</strong> {station.get('wojewodztwo', 'N/A')}</p>
                             <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: {color}; font-weight: bold;">{status.upper()}</span></p>
                             <hr style="margin: 10px 0; border: none; border-top: 1px solid #ecf0f1;">
-                            <p style="margin: 5px 0;"><strong>💧 Stan wody:</strong> {station.get('stan_wody', 'Brak danych')}</p>
-                            <p style="margin: 5px 0;"><strong>🌊 Przepływ:</strong> {station.get('przeplyw', 'Brak danych')}</p>
-                            <p style="margin: 5px 0; font-size: 0.9em; color: #7f8c8d;"><strong>🕒 Ostatnia aktualizacja:</strong><br>{station.get('ostatnia_aktualizacja', 'Brak danych')}</p>
+                            <p style="margin: 5px 0;"><strong> Stan wody:</strong> {station.get('stan_wody', 'Brak danych')}</p>
+                            <p style="margin: 5px 0;"><strong> Przepływ:</strong> {station.get('przeplyw', 'Brak danych')}</p>
+                            <p style="margin: 5px 0; font-size: 0.9em; color: #7f8c8d;"><strong> Ostatnia aktualizacja:</strong><br>{station.get('ostatnia_aktualizacja', 'Brak danych')}</p>
                         </div>
                         """
                         
@@ -279,27 +262,23 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
                 except (ValueError, TypeError) as e:
                     print(f"Błąd przy dodawaniu markera dla stacji {station.get('name', 'Unknown')}: {e}")
                     continue
-        
-        # Informacja o ograniczeniu markerów
+
         if len(stations_data) > max_markers:
             print(f"Wyświetlono {max_markers} z {len(stations_data)} stacji dla lepszej wydajności")
-    
-    # Dodaj kontrolę pełnego ekranu (z obsługą błędów)
+
     try:
         from folium.plugins import Fullscreen
         Fullscreen().add_to(m)
     except Exception as e:
         print(f"Błąd przy dodawaniu Fullscreen: {e}")
-    
-    # Dodaj mini mapę (z obsługą błędów)
+
     try:
         from folium.plugins import MiniMap
         minimap = MiniMap(toggle_display=True)
         m.add_child(minimap)
     except Exception as e:
         print(f"Błąd przy dodawaniu MiniMap: {e}")
-    
-    # Dodaj skalę (z obsługą błędów)
+
     try:
         from folium.plugins import MeasureControl
         m.add_child(MeasureControl())
@@ -312,18 +291,14 @@ def create_stations_map(stations_data: list, map_style: str = "OpenStreetMap", c
 def display_map(stations_data: list, map_style: str = "OpenStreetMap", cluster_markers: bool = False, width: int = None, height: int = None, responsive: bool = True):
     """Wyświetl mapę w aplikacji Streamlit z responsywnym interfejsem"""
     if stations_data:
-        # Automatyczne dostosowanie rozmiaru do ekranu jeśli nie podano
         if width is None:
             width = 1200 if responsive else 1000
         if height is None:
             height = 700 if responsive else 600
-            
-        # Utwórz mapę z ulepszonymi funkcjonalnościami
+
         stations_map = create_stations_map(stations_data, map_style, cluster_markers, responsive)
-        
-        # Wyświetl mapę z responsywnym kontenerem
+
         if responsive:
-            # CSS z poprawkami z-index dla markerów Folium i optymalizacją pozycjonowania
             st.markdown("""
             <style>
             /* Optymalizacja pozycjonowania mapy */
@@ -370,28 +345,26 @@ def display_map(stations_data: list, map_style: str = "OpenStreetMap", cluster_m
             folium_static(stations_map, width=width, height=height)
         else:
             folium_static(stations_map, width=width, height=height)
-        
-        # Ulepszone informacje o mapie z dodatkowymi statystykami
-        with st.expander("ℹ️ Informacje o mapie i funkcjonalności", expanded=False):
+
+        with st.expander("️ Informacje o mapie i funkcjonalności", expanded=False):
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                # Statystyki stacji
                 active_count = len([s for s in stations_data if s.get('status') != 'inactive'])
                 warning_count = len([s for s in stations_data if s.get('status') == 'warning'])
                 alarm_count = len([s for s in stations_data if s.get('status') == 'alarm'])
                 
                 st.markdown(f"""
-                **📊 Statystyki stacji:**
-                - 🏭 Łącznie: {len(stations_data)}
-                - ✅ Aktywne: {active_count}
-                - ⚠️ Ostrzeżenia: {warning_count}
-                - 🚨 Alarmy: {alarm_count}
+                ** Statystyki stacji:**
+                -  Łącznie: {len(stations_data)}
+                -  Aktywne: {active_count}
+                -  Ostrzeżenia: {warning_count}
+                -  Alarmy: {alarm_count}
                 """)
             
             with col2:
                 st.markdown(f"""
-                **🗺️ Konfiguracja mapy:**
+                ** Konfiguracja mapy:**
                 - Styl: {map_style}
                 - Warstwy: {'Wielowarstwowa' if map_style == 'OpenStreetMap' else 'Pojedyncza'}
                 - Auto-dopasowanie: Włączone
@@ -400,17 +373,16 @@ def display_map(stations_data: list, map_style: str = "OpenStreetMap", cluster_m
             
             with col3:
                 st.markdown("""
-                **🎮 Kontrolki mapy:**
-                - 🔍 Zoom: Kółko myszy lub +/-
-                - 📱 Pełny ekran: Przycisk w prawym górnym rogu
-                - 🗺️ Mini mapa: Przycisk w lewym dolnym rogu
-                - 📏 Pomiary: Przycisk w lewym górnym rogu
-                - 🔄 Warstwy: Menu w prawym górnym rogu
+                ** Kontrolki mapy:**
+                -  Zoom: Kółko myszy lub +/-
+                -  Pełny ekran: Przycisk w prawym górnym rogu
+                -  Mini mapa: Przycisk w lewym dolnym rogu
+                -  Pomiary: Przycisk w lewym górnym rogu
+                -  Warstwy: Menu w prawym górnym rogu
                 """)
-            
-            # Dodatkowe informacje o funkcjonalnościach OSM
+
             st.markdown("""
-            **🌍 Funkcjonalności OpenStreetMap:**
+            ** Funkcjonalności OpenStreetMap:**
             - **Interaktywne markery**: Kliknij marker aby zobaczyć szczegółowe informacje o stacji
             - **Tooltips**: Najedź myszą na marker aby zobaczyć podstawowe informacje
             - **Warstwy map**: Przełączaj między różnymi stylami map w sidebarze
@@ -419,5 +391,5 @@ def display_map(stations_data: list, map_style: str = "OpenStreetMap", cluster_m
             - **Kontrolki**: Pełny ekran, mini mapa, pomiary odległości i powierzchni
             """)
     else:
-        st.warning("⚠️ Brak danych stacji do wyświetlenia na mapie")
-        st.info("💡 Spróbuj dostosować filtry lub zsynchronizować dane z IMGW")
+        st.warning("️ Brak danych stacji do wyświetlenia na mapie")
+        st.info(" Spróbuj dostosować filtry lub zsynchronizować dane z IMGW")
